@@ -1,4 +1,5 @@
-
+#include "Neuron.cpp"
+#include <vector>
 
 void simulation(Neuron n, double tstop) {
 	while (n.get_t()<tstop)
