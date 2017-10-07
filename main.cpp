@@ -2,7 +2,7 @@
 #include <vector>
 
 void simulation(Neuron n, double tstop) {
-	while (n.get_t()<tstop)
+	while (n.get_t()<(tstop/h)) //acces du h pas sure...
 	n.update_state();
 }
 
