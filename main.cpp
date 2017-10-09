@@ -1,9 +1,10 @@
-#include "Neuron.cpp"
+#include "Neuron.hpp"
 #include <vector>
 
 void simulation(Neuron n, double tstop) {
-	while (n.get_t()<(tstop/h)) //acces du h pas sure...
+	while (n.get_t()<(tstop/n.h))
 	n.update_state();
+	cout<<"simulation finie :)"<<endl;
 }
 
 int main(){
