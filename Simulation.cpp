@@ -1,7 +1,8 @@
 #include "Simulation.hpp"
 #include "Neuron.hpp"
 
-Simulation::Simulation()
+Simulation::Simulation(){
+	}
 
 void Simulation::simule(size_t nb_neuron,double t_stop) {
 	while (neurons[nb_neuron+1].get_t()<(tstop/neurons[nb_neuron+1].h)){

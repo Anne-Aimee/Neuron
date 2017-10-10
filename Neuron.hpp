@@ -12,7 +12,7 @@ class Neuron {
 	
 	public :
 	
-	Neuron(double V_=0.0, int t_=0.0, int s_=0);
+	Neuron(double Iext_=20.2,double V_=0.0, int t_=0.0, int s_=0);
 
 	
 	void update_state();
@@ -24,6 +24,8 @@ class Neuron {
 	double get_V() const;
 	int get_s() const;
 	double get_h() const;
+	void add_neighbor( Neuron*);
+	
 	
 	//=====CONSTANTES=====//
 	static constexpr int RTI=1;// refractor time (multiple of h)
@@ -31,11 +33,12 @@ class Neuron {
 	static constexpr double Vreset=0.0;//V apres le refractory
 	static constexpr double tau=20.0;//correspond a des millisecondes = constante de temps
 	static constexpr double h=1.0;//correspond a des millisecondes = pas de temps
-	static constexpr double Iext=1.2;///entrée de courant, correspond a qqch plus tard, initialisé au pif
+	double Iext;///=1.2;///entrée de courant, correspond a qqch plus tard, initialisé au pif
 	static constexpr double R=20;//membrane resistance
 	static constexpr double C1=exp(-h/tau);
-	static constexpr double C2=Iext*R*(1-C1);
-	static constexpr double J=1.0; // correspond a ce qu'on rajoute au V quand un des voisins a un spike
+	double C2=Iext*R*(1-C1);
+	double J=VTHR/2; // correspond a ce qu'on rajoute au V quand un des voisins a un spike
+	static constexpr double delay =1.0;
 	//===================//
 	
 	private :

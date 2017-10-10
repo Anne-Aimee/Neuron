@@ -1,10 +1,11 @@
 #include "Neuron.hpp"
 
-Neuron::Neuron(double V_, int t_, int s_) {
+Neuron::Neuron(double Iext_,double V_, int t_, int s_) {
 	V=V_;
 	t=t_;
 	s=s_;
 	RT=0;
+	Iext=Iext_;
 }
 
 int Neuron::get_t() const {
@@ -27,11 +28,14 @@ void Neuron::update_V(){
 		V=Vreset;}
 	else {
 		int nbJ(0);
+		if (!neighbours.empty()){
 		for (auto neigh : neighbours){
 			if (neigh->spike()){
+			std::cout <<"neighspike"<< std::endl;
 			++nbJ;}	
-			V=C1*V+C2+nbJ*J;
-		}
+		}}
+		V=C1*V+C2+nbJ*J;
+	std::cout<<"V "<< V<<std::endl;
 	}
 }
 
@@ -51,8 +55,17 @@ void Neuron::update_state(){
 	
 	if (spike()){
 		spike_times.push_back(t);
+	std::cout<<"spike "<<t<< endl;
 		RT=RTI+1; }
 	update_V();
 	update_RT();
 	++t;
 }
+
+
+void Neuron::add_neighbor( Neuron* neigh){
+	if (neigh==nullptr)
+	return ;
+	else neighbours.push_back(neigh);
+}
+	
