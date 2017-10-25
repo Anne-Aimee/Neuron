@@ -1,57 +1,98 @@
 #ifndef NEURON_H
 #define NEURON_H
 
-
+#include <cassert>
 #include <vector>
+#include <array>
 #include <cmath>
-using namespace std;
 #include <iostream>
-
+using namespace std;
 
 class Neuron {
 	
 	public :
 	
-	Neuron(double Iext_=20.2,double V_=0.0, int t_=0.0, int s_=0);
-
+	Neuron(double Iext_=1.2,double V_=0.0, int t_=0.0, int s_=0);
 	
-	void update_state();
-	bool spike();
-	void update_V();
-	void update_RT();
+	//=====CONSTANTES=====//
 	
+	const double VTHR=20.0;				//spike threshold
+	const double tau=20.0;				//membrane time constant
+	static constexpr double h=0.1;		//integration stepsize
+	const double RT=2.0;				//refractory time (ms)
+	const double R=20.0;				//membrane resistance
+	static constexpr double delay=1.5;
+	static const int delaystep=delay/h;
+	//const double poisson_gen ;
+	
+	double Iext;						//external current
+	double Vreset;				//V apres le refractory
+	double C1;
+	double C2;
+	double RTstep;						//refractory steps 
+	double J; // correspond a ce qu'on rajoute au V quand un des voisins a un spike
+	//===================//
+	
+	
+	//===== GETTERS========//
 	int get_t() const;
 	double get_V() const;
 	int get_s() const;
 	double get_h() const;
-	void add_neighbor( Neuron*);
+	//=====================//
 	
 	
-	//=====CONSTANTES=====//
-	static constexpr int RTI=1;// refractor time (multiple of h)
-	static constexpr double VTHR=20.0;// Vseuil (for spikes)
-	static constexpr double Vreset=0.0;//V apres le refractory
-	static constexpr double tau=20.0;//correspond a des millisecondes = constante de temps
-	static constexpr double h=1.0;//correspond a des millisecondes = pas de temps
-	double Iext;///=1.2;///entrée de courant, correspond a qqch plus tard, initialisé au pif
-	static constexpr double R=20;//membrane resistance
-	static constexpr double C1=exp(-h/tau);
-	double C2=Iext*R*(1-C1);
-	double J=VTHR/2; // correspond a ce qu'on rajoute au V quand un des voisins a un spike
-	static constexpr double delay =1.0;
-	//===================//
+	
+	bool spike;							//existence of spike
+	array<int,delaystep+1> spikebuff ;   ///a remettre ensuite dans private !!! juste uitle pour les tests
+	bool update_state();
+	void update_V();
+	void receive(int td, double J_);
+	///bool excitatory;
+	
 	
 	private :
-	double V; // membrane potential
-	int s; //number of spikes
-	int t; //times when the spikes occured (duree = t*h)
-	int RT;
-	vector<double> spike_times ;
-	vector<Neuron*> neighbours ;
 	
-    //from documentation (dont know the correspondance with the course formula) θ =20mV;Vr =10mV;τrp =2ms.
+	double V; 							//membrane potential
+	int s; 								//number of spikes
+	int t; 								//times when the spikes occured (duree = t*h)
+	int spiketime; //indique le pas du dernier spike apparu
+	
 };
 
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

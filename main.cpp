@@ -1,28 +1,48 @@
+#include <iostream>
+#include <array>
 #include "Neuron.hpp"
+#include "Simulation.hpp"
 #include <vector>
 
-void simulation(Neuron n1,Neuron n2, double tstop) {
-	while (n2.get_t()<(tstop/n2.h)){
-		std::cout<<"t " <<n2.get_t()<< std::endl;
-	n1.update_state();
-	n2.update_state();
-}
-	cout<<"simulation finie :)"<<endl;
-}
-void create_neighborhood(Neuron n1, Neuron n2 ){
-	
-	n2.add_neighbor(&n1);
-}
+
+
 
 int main(){
-	
-	Neuron n1;
-	Neuron n2 (0.0);
-	create_neighborhood(n1, n2);
-	simulation(n1,n2, 100);
-	
+	Simulation sim;
 	return 0;
 }
 
 
-///gérer les vecteurs (pour eviter les segfault)
+
+
+
+
+
+
+
+
+/*
+A rajouter dans le Cmake quand j'aurai créé des tests : 
+enable_testing()
+add_subdirectory(gtest)
+include directories(${gtest_SOURCE_DIR}/include${gtest_SOURCE_DIR})
+add_executable (Neur_unittest Neuron.cpp Neur_unittest.cpp)
+target_link_libraries(Neur_unittest gtest gtest_main)
+add_test (Neur_unittest Neur_unittest)
+*/
+
+
+
+
+///ancien main
+/*cout<<" simulation sim ;  "<< flush;
+	sim.newneurons2();*/
+	
+	/*cout<<" sim.newneurons2();  "<< flush;
+	sim.newconnection(sim.neurons[0],sim.neurons[1]);*/
+	
+	/*cout<<" sim.newconnection(sim.neurons[0],sim.neurons[1]);"<< flush;
+	//sim.simule(2,100.0);
+	
+	cout<<" sim.simule(2,100.0);"<< flush;
+*/

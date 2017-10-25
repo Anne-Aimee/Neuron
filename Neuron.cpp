@@ -1,13 +1,24 @@
 #include "Neuron.hpp"
 
 Neuron::Neuron(double Iext_,double V_, int t_, int s_) {
+	
+	C1=exp(-h/tau);
+	C2=R*(1.0-C1);
 	V=V_;
+	Vreset=0.0;
+	J=VTHR/2;
 	t=t_;
 	s=s_;
-	RT=0;
+	RTstep=RT/h;
 	Iext=Iext_;
+	spike=false;
+	assert(spikebuff.size()==delaystep+1);
+	//spikebuff: est ce aue ce sera initialse automatiquement a 0 ??
 }
 
+
+	/* getters
+	 */ 
 int Neuron::get_t() const {
 	return t;
 }
@@ -21,51 +32,95 @@ double Neuron::get_h() const {
 	return h;
 }
 
+
+	/* update the membrane tension value 
+	 * associated with the last tension value and with spikes of neighbours and external current
+	 */
 void Neuron::update_V(){
-	if (RT>1){
-		V=0;}
-	if (RT==1){
-		V=Vreset;}
+	double S(spikebuff[t%(delaystep+1)]);
+	if ((t-spiketime)<RTstep){
+		V=0.0;}
 	else {
-		int nbJ(0);
-		if (!neighbours.empty()){
-		for (auto neigh : neighbours){
-			if (neigh->spike()){
-			std::cout <<"neighspike"<< std::endl;
-			++nbJ;}	
-		}}
-		V=C1*V+C2+nbJ*J;
-	std::cout<<"V "<< V<<std::endl;
+		V=C1*V+Iext*C2+S;}
+	spikebuff[t%(delaystep+1)]=0;
+}
+
+	/* update the state of the neuron (if it spikes or not)
+	 * @return spike (true pour existence d'un spike false sinon)
+	 */
+bool Neuron::update_state(){
+	spike=false;
+	if (V>VTHR){
+		spike=true;
+		spiketime=t;
 	}
-}
-
-void Neuron::update_RT(){
-	if (RT>0)
-	--RT;
-}
-
-bool Neuron::spike(){
-	
-	if (V>VTHR) {
-	return true ;}   
-	return false ; 
-}
-
-void Neuron::update_state(){
-	
-	if (spike()){
-		spike_times.push_back(t);
-	std::cout<<"spike "<<t<< endl;
-		RT=RTI+1; }
-	update_V();
-	update_RT();
+	update_V(); //le buffer est remis a 0 a cet endroit precis
 	++t;
+	return spike;
 }
 
-
-void Neuron::add_neighbor( Neuron* neigh){
-	if (neigh==nullptr)
-	return ;
-	else neighbours.push_back(neigh);
+	/* receive the spike from neighbours and put it in the corresponding place in the buffer
+	 * (with the delay)
+	 */
+void Neuron::receive(int td, double J_){
+	const unsigned int tout = td%(delaystep+1);
+	assert(tout<spikebuff.size());
+	spikebuff[tout]+=J_;
 }
+	
+
+///bool Neuron::is_excitatory(){
+///	if 
+	
+///}	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
