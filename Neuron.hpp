@@ -16,6 +16,7 @@ class Neuron {
 	
 	//=====CONSTANTES=====//
 	
+	const double Vext;			//??
 	const double VTHR=20.0;				//spike threshold
 	const double tau=20.0;				//membrane time constant
 	static constexpr double h=0.1;		//integration stepsize
@@ -23,7 +24,7 @@ class Neuron {
 	const double R=20.0;				//membrane resistance
 	static constexpr double delay=1.5;
 	static const int delaystep=delay/h;
-	//const double poisson_gen ;
+	//const double poisson_gen ;       (mV)
 	
 	double Iext;						//external current
 	double Vreset;				//V apres le refractory
@@ -44,11 +45,12 @@ class Neuron {
 	
 	
 	bool spike;							//existence of spike
+	bool isexcitatory;
 	array<int,delaystep+1> spikebuff ;   ///a remettre ensuite dans private !!! juste uitle pour les tests
 	bool update_state();
 	void update_V();
 	void receive(int td, double J_);
-	///bool excitatory;
+	void setexcitatory(bool b);
 	
 	
 	private :

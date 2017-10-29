@@ -6,6 +6,7 @@ Neuron::Neuron(double Iext_,double V_, int t_, int s_) {
 	C2=R*(1.0-C1);
 	V=V_;
 	Vreset=0.0;
+	Vext=VTHR*2;
 	J=VTHR/2;
 	t=t_;
 	s=s_;
@@ -13,16 +14,20 @@ Neuron::Neuron(double Iext_,double V_, int t_, int s_) {
 	Iext=Iext_;
 	spike=false;
 	assert(spikebuff.size()==delaystep+1);
-	//spikebuff: est ce aue ce sera initialse automatiquement a 0 ??
+	//poisson_gen
+	///pas bien compris comment fonctionnait le truc avec poisson
 }
 
 
 	/* getters
+	 * s : number of spikes
+	 * V : membrane potential 
+	 * h : integration stepsize
 	 */ 
 int Neuron::get_t() const {
 	return t;
 }
-int Neuron::get_s() const {
+int Neuron::get_s() const { 
 	return s;
 }
 double Neuron::get_V() const {
@@ -69,10 +74,9 @@ void Neuron::receive(int td, double J_){
 }
 	
 
-///bool Neuron::is_excitatory(){
-///	if 
-	
-///}	
+void Neuron::setexcitatory(bool b){
+	isexcitatory=b;
+}
 	
 	
 	
