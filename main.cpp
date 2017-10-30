@@ -1,4 +1,4 @@
-#include <iostream>
+
 #include <array>
 #include "Neuron.hpp"
 #include "Simulation.hpp"
@@ -9,11 +9,9 @@
 
 int main(){
 	Simulation sim;
+	sim.simule(20);
 	return 0;
 }
-
-
-
 
 
 
@@ -31,18 +29,3 @@ target_link_libraries(Neur_unittest gtest gtest_main)
 add_test (Neur_unittest Neur_unittest)
 */
 
-
-
-
-///ancien main
-/*cout<<" simulation sim ;  "<< flush;
-	sim.newneurons2();*/
-	
-	/*cout<<" sim.newneurons2();  "<< flush;
-	sim.newconnection(sim.neurons[0],sim.neurons[1]);*/
-	
-	/*cout<<" sim.newconnection(sim.neurons[0],sim.neurons[1]);"<< flush;
-	//sim.simule(2,100.0);
-	
-	cout<<" sim.simule(2,100.0);"<< flush;
-*/
