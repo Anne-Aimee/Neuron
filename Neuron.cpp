@@ -13,11 +13,15 @@ Neuron::Neuron(double Iext_,double V_) {
 	C2=R*(1.0-C1);
 	V=V_;
 	Vreset=0.0;
-	J=VTHR/2;
+	J=0.1;
 	RTstep=RT/h;
+	spiketime= -RTstep;
 	Iext=Iext_;
 	spike=false;
 	assert(spikebuff.size()==delaystep+1);
+	t=0;
+	
+	for(auto& element: spikebuff){element=0;}
 }
 
 
@@ -43,7 +47,7 @@ double Neuron::getexternalnoise(){
 	static random_device rd;
 	static mt19937 gen(rd());
 	static poisson_distribution<> poisson_gen(Vext*h/(JE*tau));
-	return Iext*poisson_gen(gen);
+	return poisson_gen(gen);
 	
 	}
 
@@ -52,10 +56,13 @@ double Neuron::getexternalnoise(){
 	 */
 void Neuron::update_V(){
 	double S(spikebuff[t%(delaystep+1)]/*+getexternalnoise()*/);
+	cerr<<"index of reading "<< t%(delaystep+1)<< endl;
 	if ((t-spiketime)<RTstep){
 		V=0.0;}
 	else {
+		
 		V=C1*V+Iext*C2+S;} 
+		cerr<<"spike buff t "<<spikebuff[t%(delaystep+1)]<< endl;
 	spikebuff[t%(delaystep+1)]=0;
 }
 
@@ -65,18 +72,25 @@ void Neuron::update_V(){
 	 * @return spike (true pour existence d'un spike false sinon)
 	 */
 bool Neuron::update_state(unsigned int nbsteps){
+	
+	spike=false;
 	for (unsigned int i(0);i<nbsteps;++i){
-		spike=false;
-		if (V>VTHR){
+		
+		
+		
+		
+		if (V>=VTHR){
 			spike=true;
 			spiketime=t;
+			
 			++s;
-			cerr<<"DEBUG : time " << t << endl;
+			//cerr<<"DEBUG : time " << t << endl;
 		}
 		
 		update_V(); //le buffer est remis a 0 a cet endroit precis
-		cerr<<"DEBUG : membrane pote " << get_V() << endl;
+		//cerr<<"DEBUG : membrane pote " << get_V() << endl;
 		++t;
+		cerr<<"DEBUG : time " << t << endl;
 	}
 	return spike;
 }
@@ -88,6 +102,8 @@ void Neuron::receive(int td, double J_){
 	const unsigned int tout = td%(delaystep+1);//-1
 	assert(tout<spikebuff.size());
 	spikebuff[tout]+=J_;
+	cerr<<"DEBUG : receive J " << J_ << endl;
+	cerr<<"BEBUG : index of writing "<<tout<<endl;
 }
 	/* setter
 	 * @param bool : true to set the neuron as excitatory and false to set it as inhibitory
@@ -97,23 +113,6 @@ void Neuron::receive(int td, double J_){
 void Neuron::setexcitatory(bool b){
 	isexcitatory=b;
 }
-	
-	
-	/*
-void  Neuron::askIext(){
-	do{
-	cout<<"Please enter a number for external current (in mV)"<< endl;
-	cin>>Iext>> endl;}
-	assert(Iext<1000 and Iext>-1000);
-	///mieux de envoyer un message d erreur mais bon
-}
-	*/
-	
-	
-	
-	
-	
-	
 	
 	
 	
