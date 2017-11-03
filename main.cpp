@@ -9,7 +9,10 @@
 
 int main(){
 	Simulation sim;
-	sim.simule(20);
+	cerr<<"creation ok"<<endl;
+	//t en ms 1s=1000ms
+	sim.simule(1000);
+	cerr<<"simulation ok"<<endl;
 	return 0;
 }
 

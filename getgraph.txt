@@ -1,0 +1,12 @@
+python
+
+import numpy as np
+import matplotlib.pyplot as pl
+data = np.genfromtxt('/home/INTRANET/bernard/Desktop/myfiles/SV-2/Project1/build/graphfile.txt' )
+select= np.array([d for d in data if d[1] < 30])
+data1=select.transpose()
+pl.scatter(0.1*data1[1],data1[1],alpha=0.8, edgecolors='none');
+
+
+pl.show();
+

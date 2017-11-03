@@ -3,13 +3,14 @@
 #include <random>
 #include <cassert>
 #include <iostream>
+#include <fstream>
+
 using namespace std;
 
 
 
-/* constructor
- * @see setexcitatoryneurons()
- * @see initialconnexions()
+/**
+ * A constructor.
  * */
 
 
@@ -25,70 +26,74 @@ Simulation::Simulation(){
 }
 	
 	
-/* simulation : simulates the activity of the neuron network during a certain period
+/**
+ * simulation : simulates the activity of the neuron network during a certain period
  * @param double : period of simulation (in ms)
- * @see Neuron::updatestate()
- * @see Neuron::receive()
  */
 void Simulation::simule(double t_stop) {
 	while (globalclock<(t_stop/neurons[0]->h)){
 		for(unsigned int i(0);i<neurons.size();++i){
 			neurons[i]->spike=neurons[i]->update_state(1);
 			if (neurons[i]->spike) {
-				//assert que V de neuronsi est bien superieur a vthr
-				for (unsigned int j(0);j<neurons.size();++j){
-					if(connexions[i][j]){
-					neurons[j]->receive(globalclock+(neurons[i]->delaystep),neurons[i]->J);}
+				for (auto target : neurons[i]->targets){
+					target->receive(globalclock+(neurons[i]->delaystep),neurons[i]->J);
 				}
 			}
 		}
+		cerr<<"simulation end of time : "<<globalclock<<endl;
+		++globalclock;
 	}
-	++globalclock;
 }
 
-/* creates a new connexion between two identified neurons 
+/**
+ * creates a new connexion between two identified neurons 
  * @param Neuron* n1 : pointer on preconnexion neuron;
  * @param Neuron* n2 : pointer on postconnexion neuron;
+ * @see initialconnexions
  */ 
-void Simulation::newconnexion(Neuron* n1, Neuron* n2){//faire retourner un message d erreur si il ne trouve pas n1 et ou n2 dans la liste de neurones
-	int pre(0);
-	int post(0);
-	for (unsigned int i(0);i<neurons.size();++i){
-		if (neurons[i]==n1) 
-		 pre=i;
-		else if (neurons[i]==n2)
-		 post=i;
-	}
-	++ connexions[pre][post];
+void Simulation::newconnexion(Neuron* n1, Neuron* n2){
+	assert(n1!=nullptr);
+	(n1->targets).push_back(n2);
 }
 		
 
-/* creates connexions in the neuron network (connexions with excitatory and inhibitory neurons from the network)
- * modifies the matrix of connexions
+/**
+ * creates random connexions in the neuron network (connexions with excitatory and inhibitory neurons from the network)
+ * with defined number of excitatory connexions and inhibitory connexions
  */ 
-void Simulation::initialconnexions(){		
+void Simulation::initialconnexions(){
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<> dis1(0, nb_excitatory-1);
+			
+	random_device rd2;
+	mt19937 gen2(rd2());
+	uniform_int_distribution<> dis2(nb_excitatory, neurons.size()-1);
+			
 for (unsigned int n(0);n<neurons.size();++n){	
 
-	for (unsigned int e(0);e<CE;++e){
-		unsigned int pre_excitatory (0); //pre_excitatory est le numero de la case pris au hasard parmis les numeros de case de excitatory neurons
-		pre_excitatory = rand() % nb_excitatory; 
-		assert(neurons[pre_excitatory]->isexcitatory);
-		assert (pre_excitatory<nb_excitatory);
-		++connexions[pre_excitatory][n];
-	}
-	for (unsigned int i(0);i<CI;++i){
-		unsigned int pre_inhibitory (0);
-		pre_inhibitory = rand() %  nb_inhibitory +(nb_excitatory+1); 
-		assert(! neurons[pre_inhibitory]->isexcitatory);
-		assert(pre_inhibitory>= nb_excitatory and pre_inhibitory<neurons.size());
-		++connexions[pre_inhibitory][n];
-	}	
-	
-}
+	for (unsigned int e(0);e< (CE+CI);++e){
+		if(e < CE){
+			unsigned int pre_excitatory (0); //pre_excitatory est le numero de la case pris au hasard parmis les numeros de case de excitatory neurons
+			pre_excitatory = dis1(gen); 
+			assert(neurons[pre_excitatory]->isexcitatory);
+			assert (pre_excitatory<nb_excitatory);
+			newconnexion(neurons[pre_excitatory],neurons[n]);
+		}else{
+			unsigned int pre_inhibitory (0);
+			pre_inhibitory = dis2(gen2);
+			assert(! neurons[pre_inhibitory]->isexcitatory);
+			assert(pre_inhibitory>= nb_excitatory and pre_inhibitory<neurons.size());
+			newconnexion(neurons[pre_inhibitory],neurons[n]);
+			}
+		}
 
+	}
 }
 		
-/* select which neurons of the network are excitatory and inhibitory
+/**
+ * select which neurons of the network are excitatory and inhibitory
+ * @see Simulation
  */ 		
 void Simulation::setexcitatoryneurons(){
 	for (unsigned int i(0);i<nb_excitatory;++i){
@@ -103,17 +108,23 @@ void Simulation::setexcitatoryneurons(){
 	
 }
 
+/**
+ * save all the times and neuron identifier in another file 
+ * save date for the graph
+ */ 
 
-
-/*
-///pour la suite quand je pourrais afficher
-void Simulation::save(string graphfile){
+void Simulation::save(const string& graphfile){
 	ofstream out(graphfile);
-	//get spiketime + get spikeid
-	graphfile<<(spikelist)<<'/t'<<(spikeid)<<'/n';
-	
-	
-		}*/
-		
+	if(out.fail()){
+		cerr<<"Saving data in graphfile impossible"<<endl;}
+	else {
+		for(unsigned int i=0; i<neurons.size();++i){
+			for(auto spiket : neurons[i]->spiketime){
+				out<<spiket<<'\t'<<i<<'\n';}
+		}
+		out.end();
+	}
+}
+
 
 

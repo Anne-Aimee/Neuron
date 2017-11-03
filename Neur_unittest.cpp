@@ -2,13 +2,33 @@
 #include "Simulation.hpp"
 #include "gtest/gtest.h"
 
+
+
+	/** 
+	 * Tests for one neuron and only one step
+	 * if membrame potential is correct, and if it can spikes
+	 * with first neuron1 : Iext=1.0, Vinitial=0.0;
+	 * shouldnt spike, and we can expect V value
+	 * then neuron2: Iext=1.0, Vinitial>VTHR;
+	 * should spike and V value is 0 
+	 */ 
 TEST(OneNeuron, oneStep)
 {
-	Neuron neuron(1.0);
+	Neuron neuron1(1.0);
 	bool spiketest;
-	spiketest=neuron.update_state(1);
-	EXPECT_NEAR(0.0997504,neuron.get_V(),0.001);
+	spiketest=neuron1.update_state(1);
+	EXPECT_NEAR(0.0997504,neuron1.get_V(),0.001);
+	
+	Neuron neuron2(1.0,neuron2.VTHR+0.1);
+	spiketest=neuron2.update_state(1);
+	EXPECT_EQ(0, neuron2.get_V());
+	EXPECT_TRUE(spiketest);
 }
+
+	/** 
+	 * Tests for one neuron if it has the correct V before and after the spike
+	 * and if it spikes at the correct t
+	 */ 
 
 TEST(NeuronTest, CorrectV){
 	Neuron neuron(1.01);
@@ -19,6 +39,9 @@ TEST(NeuronTest, CorrectV){
 	EXPECT_TRUE(spiketest);
 	EXPECT_EQ(0,neuron.get_V());
 }
+	/** 
+	 * Tests the spikes for one neuron (correct number and correct times)
+	 */ 
 
 TEST(NeuronTest, SpikeTimes) {
 	Neuron neuron(1.01);
@@ -46,7 +69,9 @@ TEST(NeuronTest, SpikeTimes) {
 	
 }
 
-
+/** 
+	 * Tests for two neuron the correct sending of the spike
+	 */ 
 TEST(TwoNeuron,SendDelayofJ) {
 	Neuron neuron1(1.01), neuron2(0.0);
 	int delaytest = 15;
@@ -58,24 +83,44 @@ TEST(TwoNeuron,SendDelayofJ) {
 			EXPECT_EQ(0.0, neuron1.get_V());
 		}
 		neuron2.update_state(1);
-		cerr<<"neuron 2 V "<<neuron2.get_V()<<endl;
 	}
 	EXPECT_NEAR(0.1, neuron2.get_V(),0.001);
 	
 }
 
 /*
-TEST(Network, simulation){
+TEST(Network, Connexions){
 	Simulation sim;
-	sim.simule(3);
+	unsigned int nb_excit(0);
+	unsigned int nb_inhibit(0);
+	for (auto neuron : neurons){
+		if (neuron->isexcitatory)
+		++nb_excit;
+		else ++nb_inhibit;
+	}
+	EXPECT_EQ(1000, nb_excit);
+	EXPECT_EQ(250, nb_inhib);
 	
+	//tester aussi ici les initial connexions si possible	
 }*/
+
+
+
+TEST(Network, Onestep){
+	Simulation sim;
+	sim.simule(1);
+	
+}
+
+/*
+TEST(Network, Simulation){
+	Simulation sim;
+	sim.simule(1);
+	
+}
+*/
 
 int main(int argc, char **argv){
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
-
-
-
-/// tous les tests de 1 ou 2 neurones fonctionnent 

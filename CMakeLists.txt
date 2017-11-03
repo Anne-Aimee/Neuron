@@ -9,7 +9,6 @@ include_directories(${gtest_SOURCE_DIR}/include${gtest_SOURCE_DIR})
 
 add_executable (Neuron Neuron.cpp main.cpp Simulation.cpp)
 
-add_executable (Neur_unittest Neuron.cpp Neur_unittest.cpp)
+add_executable (Neur_unittest Neuron.cpp Simulation.cpp Neur_unittest.cpp)
 target_link_libraries(Neur_unittest gtest gtest_main)
 add_test (Neur_unittest Neur_unittest)
-

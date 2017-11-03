@@ -5,17 +5,16 @@
 
 
 
-	/* constructor
+	/**
+	 * A constructor.
 	 */
 Neuron::Neuron(double Iext_,double V_) {
 	
 	C1=exp(-h/tau);
 	C2=R*(1.0-C1);
 	V=V_;
-	Vreset=0.0;
-	J=0.1;
+	J=JE;
 	RTstep=RT/h;
-	spiketime= -RTstep;
 	Iext=Iext_;
 	spike=false;
 	assert(spikebuff.size()==delaystep+1);
@@ -24,132 +23,112 @@ Neuron::Neuron(double Iext_,double V_) {
 	for(auto& element: spikebuff){element=0;}
 }
 
-
-	/* getters
-	 * s : number of spikes
-	 * V : membrane potential 
-	 * h : integration stepsize
+	/** 
+	 * A getter
+	 * @return t corresponds to the local steptime
+	 * 
 	 */ 
 int Neuron::get_t() const {
 	return t;
 }
+	/** 
+	 * A getter
+	 * @return s corresponds to the number of spikes
+	 */ 
 int Neuron::get_s() const { 
 	return s;
 }
+	/** 
+	 * A getter
+	 * @return V corresponds to membrane potential 
+	 */ 
 double Neuron::get_V() const {
 	return V;
 }
+	/** 
+	 * A getter
+	 * @return h corresponds to the integration stepsize 
+	 */ 
 double Neuron::get_h() const {
 	return h;
 }
-
+	/** 
+	 * A getter
+	 * @see update_V()
+	 * @return external noise (due to spikes coming from neurons outside the simulation)
+	 */ 
 double Neuron::getexternalnoise(){
 	static random_device rd;
 	static mt19937 gen(rd());
 	static poisson_distribution<> poisson_gen(Vext*h/(JE*tau));
 	return poisson_gen(gen);
-	
 	}
 
-	/* update the membrane tension value 
-	 * associated with the last tension value and with spikes of neighbours and external current
+	/**
+	 * reads the current coming from neighbours' spikes and clean the buffer after reading
+	 * @return  the value of total current coming from neighbours' spikes 
 	 */
-void Neuron::update_V(){
-	double S(spikebuff[t%(delaystep+1)]/*+getexternalnoise()*/);
-	cerr<<"index of reading "<< t%(delaystep+1)<< endl;
-	if ((t-spiketime)<RTstep){
-		V=0.0;}
-	else {
-		
-		V=C1*V+Iext*C2+S;} 
-		cerr<<"spike buff t "<<spikebuff[t%(delaystep+1)]<< endl;
+
+double Neuron::readbuffer(){
+	double buffert = spikebuff[t%(delaystep+1)];
 	spikebuff[t%(delaystep+1)]=0;
+	return buffert;
 }
 
-	/* update the state of the neuron a certain number of times (to make it spike or not)
+	/**
+	 * update the membrane tension value associated with :
+	 * the last tension value, spikes of neighbours and external current
+	 * @see update_state()
+	 */
+void Neuron::update_V(){
+	double S(readbuffer()+getexternalnoise());
+	if (spiketime.size()>0){
+		if ((t-spiketime.back())<RTstep){
+			V=0.0;}
+		else { V=C1*V+Iext*C2+S;}
+	}
+	else { V=C1*V+Iext*C2+S;} 
+}
+
+	/**
+	 * update the state of the neuron a certain number of times (to make it spike or not)
 	 * @param unsigned int : number of steps for updating
-	 * @see update_V()
-	 * @return spike (true pour existence d'un spike false sinon)
+	 * @see Simulation::simule()
+	 * @return spike (true if there is the spike at the last step of update and false otherwise)
 	 */
 bool Neuron::update_state(unsigned int nbsteps){
-	
 	spike=false;
 	for (unsigned int i(0);i<nbsteps;++i){
-		
-		
-		
-		
 		if (V>=VTHR){
 			spike=true;
-			spiketime=t;
-			
+			spiketime.push_back(t);
 			++s;
-			//cerr<<"DEBUG : time " << t << endl;
 		}
-		
-		update_V(); //le buffer est remis a 0 a cet endroit precis
-		//cerr<<"DEBUG : membrane pote " << get_V() << endl;
+		update_V();
 		++t;
-		cerr<<"DEBUG : time " << t << endl;
 	}
 	return spike;
 }
 
-	/* receives the spike from neighbours and put it (write) in the corresponding place in the buffer
+	/**
+	 * receives the spike from neighbours and put it (write it) in the corresponding place in the buffer
 	 * (with the delay)
+	 * @param int : time step of neighbours' spike+delay (td will be the time of reading)
+	 * @param double : current given from neighbours'spike
+	 * @see Simulation::simule()
 	 */
 void Neuron::receive(int td, double J_){
-	const unsigned int tout = td%(delaystep+1);//-1
+	const unsigned int tout = td%(delaystep+1);
 	assert(tout<spikebuff.size());
 	spikebuff[tout]+=J_;
-	cerr<<"DEBUG : receive J " << J_ << endl;
-	cerr<<"BEBUG : index of writing "<<tout<<endl;
 }
-	/* setter
-	 * @param bool : true to set the neuron as excitatory and false to set it as inhibitory
+	/**
+	 * A setter.
 	 * modifies the boolean isexcitatory
+	 * @param bool : true to set the neuron as excitatory and false to set it as inhibitory
+	 * @see Simulation::setexcitatoryneurons()
 	 */
 
 void Neuron::setexcitatory(bool b){
 	isexcitatory=b;
 }
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
