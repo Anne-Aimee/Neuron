@@ -12,9 +12,9 @@
 	 * then neuron2: Iext=1.0, Vinitial>VTHR;
 	 * should spike and V value is 0 
 	 */ 
-TEST(OneNeuron, oneStep)
+TEST(OneNeuron, OneStep)
 {
-	Neuron neuron1(1.0);
+	Neuron neuron1(1.0,0.0,false);
 	bool spiketest;
 	spiketest=neuron1.update_state(1);
 	EXPECT_NEAR(0.0997504,neuron1.get_V(),0.001);
@@ -30,8 +30,8 @@ TEST(OneNeuron, oneStep)
 	 * and if it spikes at the correct t
 	 */ 
 
-TEST(NeuronTest, CorrectV){
-	Neuron neuron(1.01);
+TEST(OneNeuron, CorrectV){
+	Neuron neuron(1.01,0.0,false);
 	bool spiketest;
 	spiketest=neuron.update_state(924);
 	EXPECT_FALSE(spiketest);
@@ -43,8 +43,8 @@ TEST(NeuronTest, CorrectV){
 	 * Tests the spikes for one neuron (correct number and correct times)
 	 */ 
 
-TEST(NeuronTest, SpikeTimes) {
-	Neuron neuron(1.01);
+TEST(OneNeuron, SpikeTimes) {
+	Neuron neuron(1.01,0.0,false);
 	bool spiketest;
 	//We know that the spikes times are at 92.4ms, 186.8 ms...
 	
@@ -71,9 +71,10 @@ TEST(NeuronTest, SpikeTimes) {
 
 /** 
 	 * Tests for two neuron the correct sending of the spike
+	 * and if the post connexion neuron receives the J at given delay
 	 */ 
 TEST(TwoNeuron,SendDelayofJ) {
-	Neuron neuron1(1.01), neuron2(0.0);
+	Neuron neuron1(1.01,0.0,false), neuron2(0.0,0.0,false);
 	int delaytest = 15;
 	
 	//We wait for the first spike in neuron1 to see the impact on neuron2
@@ -88,37 +89,49 @@ TEST(TwoNeuron,SendDelayofJ) {
 	
 }
 
-/*
+/** 
+	 * Tests if there  is the good amount of connexions with inhibitory
+	 * and excitatory neurons for each neuron
+	 */ 
+
 TEST(Network, Connexions){
 	Simulation sim;
 	unsigned int nb_excit(0);
 	unsigned int nb_inhibit(0);
-	for (auto neuron : neurons){
+	for (auto neuron : sim.neurons){
 		if (neuron->isexcitatory)
 		++nb_excit;
 		else ++nb_inhibit;
 	}
-	EXPECT_EQ(1000, nb_excit);
-	EXPECT_EQ(250, nb_inhib);
-	
-	//tester aussi ici les initial connexions si possible	
-}*/
+	EXPECT_EQ(10000, nb_excit);
+	EXPECT_EQ(2500, nb_inhibit);
+} 
 
+/** 
+	 * Shows the graph for ten step
+	 * some neurons should have spiked but only few of them
+	 */ 
 
-
-TEST(Network, Onestep){
+TEST(Network, Tenstep){
 	Simulation sim;
 	sim.simule(1);
+	sim.save("graphfile.txt");
+	system("python ../src/pyscript.py"); 
 	
 }
 
-/*
-TEST(Network, Simulation){
+/** 
+	 * Shows the graph for hundred steps
+	 * the pattern shows the randomness of the spikes
+	 */ 
+
+TEST(Network, Hundredsteps){
 	Simulation sim;
-	sim.simule(1);
-	
+	sim.simule(10);
+	sim.save("graphfile.txt");
+	system("python ../src/pyscript.py"); 
+
 }
-*/
 
 int main(int argc, char **argv){
 	::testing::InitGoogleTest(&argc, argv);

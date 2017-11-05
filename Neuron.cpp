@@ -8,7 +8,7 @@
 	/**
 	 * A constructor.
 	 */
-Neuron::Neuron(double Iext_,double V_) {
+Neuron::Neuron(double Iext_,double V_, bool externalnoise_) {
 	
 	C1=exp(-h/tau);
 	C2=R*(1.0-C1);
@@ -16,9 +16,12 @@ Neuron::Neuron(double Iext_,double V_) {
 	J=JE;
 	RTstep=RT/h;
 	Iext=Iext_;
+	externalnoise=externalnoise_;
 	spike=false;
+	isexcitatory=true;
 	assert(spikebuff.size()==delaystep+1);
 	t=0;
+	s=0;
 	
 	for(auto& element: spikebuff){element=0;}
 }
@@ -54,15 +57,21 @@ double Neuron::get_h() const {
 }
 	/** 
 	 * A getter
+	 * a neuron is connected to a number(generated with Poisson distribution)
+	 * of excitatory neurons outside of the simulation 
 	 * @see update_V()
 	 * @return external noise (due to spikes coming from neurons outside the simulation)
-	 */ 
+	 */ 	
+	
+
 double Neuron::getexternalnoise(){
+	if(!externalnoise)
+		{return 0;}
 	static random_device rd;
 	static mt19937 gen(rd());
 	static poisson_distribution<> poisson_gen(Vext*h/(JE*tau));
-	return poisson_gen(gen);
-	}
+	return JE*poisson_gen(gen);
+	} 
 
 	/**
 	 * reads the current coming from neighbours' spikes and clean the buffer after reading
@@ -131,4 +140,25 @@ void Neuron::receive(int td, double J_){
 
 void Neuron::setexcitatory(bool b){
 	isexcitatory=b;
+}
+
+	/**
+	 * A setter.
+	 * modifies the value of J for the neuron
+	 * @param JI : new value for J
+	 * @see Simulation::setexcitatoryneurons()
+	 */
+	 
+void Neuron::setJ(double JI){
+	J=JI;
+}
+
+	/**
+	 * A setter.
+	 * modifies the value of Vext (given the weight between Vext and VTHR)
+	 * @param double weight between Vext and VTHR
+	 * @see Simulation::Simulation()
+	 */
+void Neuron::setVext(double WVEXT_VTHR){
+	Vext=WVEXT_VTHR*VTHR;
 }

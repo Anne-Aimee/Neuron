@@ -11,12 +11,12 @@ class Neuron {
 	
 	public :
 	
-	Neuron(double Iext_=1.2,double V_=0.0);
+	Neuron(double Iext_=0.0,double V_=0.0,bool externalnoise_ =true);
 	
 	//=====CONSTANTES=====//
 	
 	static constexpr double VTHR=20.0;	//!<spike threshold
-	static constexpr double Vext=2*VTHR; //!<potential from external neurons
+	double Vext=2*VTHR; 				//!<potential from external neurons
 	static constexpr double Vreset=0.0;	//!<V after refractory time
 	const double tau=20.0;				//!<membrane time constant
 	static constexpr double h=0.1;		//!<integration stepsize
@@ -45,6 +45,8 @@ class Neuron {
 	
 	//===== SETTERS========//
 	void setexcitatory(bool b);
+	void setJ(double JI);
+	void setVext(double WVEXT_VTHR);
 	//=====================//
 	
 	//== USEFUL SIMULATION FONCTIONS==//
@@ -54,18 +56,18 @@ class Neuron {
 	double readbuffer();
 	//===============================//
 	
-	
+	bool externalnoise;					//!<existence of random external noise (otherwise input current)
 	bool spike;							//!<existence of spike
 	bool isexcitatory;					//!<type of neuron (excitatory=true, inhibitory=false)
 	vector<Neuron*> targets;			//!<contains adresses of neurons that will receive a J if the neuron spikes
-	vector<int> spiketime; 				//!<time of spikes (in steps)
+	vector<unsigned int> spiketime; 	//!<time of spikes (in steps)
 
 
 	private :
 	
 	double V; 							//!<membrane potential
 	int s; 								//!<number of spikes, variable used for tests
-	int t; 								//!<times when the spikes occured (duree = t*h)
+	unsigned int t; 					//!<times when the spikes occured (duree = t*h)
 	array<double,delaystep+1> spikebuff ;//!<buffer where incoming J from neighbours' spikes are stocked to be read after delay 
 	
 	

@@ -14,10 +14,14 @@ using namespace std;
  * */
 
 
-Simulation::Simulation(){
-	
+Simulation::Simulation(double WEIGHT_VEXTVTHR_,double WEIGHT_JIJE_){
+	WEIGHT_JIJE= WEIGHT_JIJE_;
+	assert(WEIGHT_JIJE>0);
+	WEIGHT_VEXTVTHR=WEIGHT_VEXTVTHR_;
+	assert(WEIGHT_VEXTVTHR>0);
 	for(unsigned int i(0);i<neurons.size();++i){
 		neurons[i]=new Neuron;
+		neurons[i]->setVext(WEIGHT_VEXTVTHR);
 	}
 	assert(neurons.size()==nb_excitatory+nb_inhibitory);
 	globalclock=0;
@@ -60,6 +64,7 @@ void Simulation::newconnexion(Neuron* n1, Neuron* n2){
 /**
  * creates random connexions in the neuron network (connexions with excitatory and inhibitory neurons from the network)
  * with defined number of excitatory connexions and inhibitory connexions
+ * @see Simulation
  */ 
 void Simulation::initialconnexions(){
 	random_device rd;
@@ -74,7 +79,8 @@ for (unsigned int n(0);n<neurons.size();++n){
 
 	for (unsigned int e(0);e< (CE+CI);++e){
 		if(e < CE){
-			unsigned int pre_excitatory (0); //pre_excitatory est le numero de la case pris au hasard parmis les numeros de case de excitatory neurons
+			unsigned int pre_excitatory (0); 
+			//pre_excitatory is the index taken randomly in all excitatory neurons indexes from the vector "neurons"
 			pre_excitatory = dis1(gen); 
 			assert(neurons[pre_excitatory]->isexcitatory);
 			assert (pre_excitatory<nb_excitatory);
@@ -98,11 +104,11 @@ for (unsigned int n(0);n<neurons.size();++n){
 void Simulation::setexcitatoryneurons(){
 	for (unsigned int i(0);i<nb_excitatory;++i){
 		neurons[i]->setexcitatory(true);
-		neurons[i]->J=JE;
 		assert(neurons[i]->J==JE and neurons[i]->isexcitatory);	
 	}
 	for (unsigned int i(nb_excitatory);i<neurons.size(); ++i){
-		neurons[i]->J=JI;
+		neurons[i]->setJ(JI);
+		neurons[i]->setexcitatory(false);
 		assert(neurons[i]->J==JI and !neurons[i]->isexcitatory);
 	}
 	
@@ -122,7 +128,7 @@ void Simulation::save(const string& graphfile){
 			for(auto spiket : neurons[i]->spiketime){
 				out<<spiket<<'\t'<<i<<'\n';}
 		}
-		out.end();
+		out.close();
 	}
 }
 
