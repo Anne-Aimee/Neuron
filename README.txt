@@ -20,5 +20,6 @@ And write the following lines in the terminal :
 	
 
 
-A I have too many spikes, the generation of a graph takes quite a long time
+As I have too many spikes, the generation of a graph takes quite a long time
 (around 6 minutes for 1seconde simulation with g=5 and Vext/Vthr=2).
+The machines didn't work for the last 2 weeks so I couldn't see my graphs.
